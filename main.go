@@ -1,26 +1,38 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/Rishan-Jadva/gator/internal/config"
 )
 
+type state struct {
+	cfg *config.Config
+}
+
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		log.Fatalf("error reading config: %v", err)
 	}
 
-	err = cfg.SetUser("rndmsns")
+	programState := &state{&cfg}
+	programCommands := &commands{make(map[string]func(*state, command) error)}
+
+	programCommands.register("login", handlerLogin)
+
+	if len(os.Args) < 2 {
+		log.Fatal("Usage: cli <command> [args...]")
+	}
+
+	commandName := os.Args[1]
+	commandArgs := os.Args[2:]
+
+	cmd := command{commandName, commandArgs}
+
+	err = programCommands.run(programState, cmd)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		log.Fatal(err)
 	}
-
-	updatedCfg, err := config.Read()
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-	}
-
-	fmt.Printf("Config loaded:\nDB URL: %s\nCurrent User: %s\n", updatedCfg.DBUrl, updatedCfg.CurrentUser)
 }
