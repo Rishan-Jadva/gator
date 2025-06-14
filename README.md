@@ -36,23 +36,13 @@ Replace the values as appropriate for your setup.
 Here are a few example commands you can run after building or installing the CLI:
 
 ```bash
-    gator register – Register a new user
+    gator register <user-name> – Register a new user
 
-    gator login – Log in as an existing user
+    gator login <user-name> – Log in as an existing user
 
-    gator addfeed <feed-url> – Add an RSS feed to follow
+    gator addfeed <feed-name> <feed-url> – Add an RSS feed to follow
 
     gator feeds – List available feeds
 
     gator agg – Run the feed aggregation process (scrape the next feed and display item titles)
-
-    gator reset – Reset the database (development only)
 ```
-
-You can also run:
-
-```bash
-gator help
-```
-
-To view the full list of available commands and descriptions.
