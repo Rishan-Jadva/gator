@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"os"
@@ -37,10 +38,10 @@ func main() {
 	programCommands.register("reset", handlerReset)
 	programCommands.register("users", handlerListUsers)
 	programCommands.register("agg", handlerAgg)
-	programCommands.register("addfeed", handlerAddFeed)
+	programCommands.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	programCommands.register("feeds", handlerListFeeds)
-	programCommands.register("follow", handlerFollow)
-	programCommands.register("following", handlerFollowing)
+	programCommands.register("follow", middlewareLoggedIn(handlerFollow))
+	programCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
@@ -54,5 +55,15 @@ func main() {
 	err = programCommands.run(programState, cmd)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	return func(s *state, cmd command) error {
+		user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUser)
+		if err != nil {
+			return err
+		}
+		return handler(s, cmd, user)
 	}
 }
